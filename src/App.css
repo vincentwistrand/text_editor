@@ -24,6 +24,7 @@ body {
 .ql-container {
   border-color: black !important;
   min-height: 200px;
+  background-color: white;
 }
 
 .Save {
