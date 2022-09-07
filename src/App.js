@@ -1,27 +1,22 @@
-// import logo from './logo.svg';
-import './App.css';
+import './css/App.css';
 
-import React, { useState } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React, { Component } from 'react';
+import {Routes, Route} from 'react-router-dom'
 
-function App(props) {
-  const [value, setValue] = useState('');
+import Docs from "./components/docs"
+import Editor from "./components/editor"
 
-  function save() {
-    console.log(value);
+class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Docs />} />
+          <Route path="/editor" element={<Editor />} />
+        </Routes>
+      </div>
+    );
   }
-  
-  return (
-    <>
-    <div className="App">
-        <h1>Text Editor</h1>
-        <button className='Save' onClick={save}>Save</button>
-        <div className='Editor'>
-          <ReactQuill theme="snow" value={value} onChange={setValue} placeholder={"Write something"} />
-        </div>
-      </div></>
-  );
 }
 
 export default App;
