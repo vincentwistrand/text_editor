@@ -28,7 +28,7 @@ function Docs() {
     // Open document in editor.
     const openDoc = () => {
         if (currentDoc) {
-            navigate('/editor',  {state: currentDoc });
+            navigate('/texteditor',  {state: currentDoc });
         }
     };
 
@@ -41,7 +41,7 @@ function Docs() {
     async function newDoc(title) {
         const doc = { name: title, content: "" };
         await docsModel.createDoc(doc);
-        alert('Dokument "' + title + '" skapat!')
+        // alert('Dokument "' + title + '" skapat!')
         window.location.reload(false);
     }
 
@@ -80,22 +80,5 @@ function Docs() {
     </>
   );
 }
-
-//{docs.map((doc, index) => <button onClick={() => console.log("hit")}>
-//<div style={{width: '150px', height: '150px', display: 'inline-block'}} value={index} key={index}>
-//    <div style={{width: '100px', height: '100px', backgroundImage: 'url(/logo192.png)'}}></div>
-//    <p>{doc.name}</p>
-//</div>
-//</button>)}
-
-//{docs.map((doc, index) => {
-//    return <button style={{backgroundColor: 'orange', marginInline: '30px', padding: '10px', marginTop: '20px'}}  key={index}
-//                    onClick={() => navigate('/editor',  {state: {id: doc._id, name: doc.name, content: doc.content} })}>
-//                <h4>{doc.name}</h4>
-//            </button>;
-//
-//})}
-
-// onClick={() => navigate('/editor', {replace: true})}
 
 export default Docs;
