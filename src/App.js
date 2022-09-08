@@ -1,22 +1,18 @@
 import './css/App.css';
 
-import React, { Component } from 'react';
-import {Routes, Route} from 'react-router-dom'
+import React from 'react';
+import { Routes, Route } from "react-router-dom";
 
 import Docs from "./components/docs"
-import Editor from "./components/editor"
+import TextEditor from "./components/texteditor"
 
-class App extends Component {
-  render() {
+function App() {
     return (
-      <div className="App">
         <Routes>
           <Route path="/" element={<Docs />} />
-          <Route path="/editor" element={<Editor />} />
+          <Route path="/editor" element={<TextEditor />} />
         </Routes>
-      </div>
     );
-  }
 }
 
 export default App;
