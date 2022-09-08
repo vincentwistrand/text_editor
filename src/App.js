@@ -10,7 +10,7 @@ function App() {
     return (
         <Routes>
           <Route path="/" element={<Docs />} />
-          <Route path="/editor" element={<TextEditor />} />
+          <Route path="/texteditor" element={<TextEditor />} />
         </Routes>
     );
 }
