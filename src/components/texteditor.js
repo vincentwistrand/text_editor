@@ -12,7 +12,7 @@ function TextEditor() {
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
   const [id, setId] = useState('');
-  const [saved, setSaved] = useState('Save');
+  const [saved, setSaved] = useState('Spara');
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -35,10 +35,10 @@ function TextEditor() {
   async function save() {
     const doc = { id: location.state._id, name: name, content: content };
     await docsModel.saveDoc(doc);
-    setSaved("Saved");
+    setSaved("Sparat");
     
     setTimeout(() => {
-      setSaved("Save");
+      setSaved("Spara");
     }, 3000);
   }
 
@@ -55,9 +55,9 @@ function TextEditor() {
     <Header />
     <div className='editor-page'>
         <h2>{name}</h2>
-        <button className='editor-buttons' onClick={() => navigate("/")}>Back</button>
+        <button className='editor-buttons' onClick={() => navigate("/")}>Tillbaka</button>
         <button className='editor-buttons' onClick={save}>{saved}</button>
-        <button className='editor-buttons editor-delete' onClick={deleteDocument}>Delete</button>
+        <button className='editor-buttons editor-delete' onClick={deleteDocument}>Radera</button>
         <div className='Editor'>
           <ReactQuill theme="snow" value={content} onChange={setContent} placeholder={"Write something"} />
         </div>
