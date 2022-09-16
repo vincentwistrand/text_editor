@@ -37,8 +37,13 @@ function Docs() {
         setTitle(event.target.value);
     };
 
+    console.log(title);
+
     // Create new document in database.
     async function newDoc(title) {
+        if (title === "") {
+            return;
+        }
         const doc = { name: title, content: "" };
         await docsModel.createDoc(doc);
         // alert('Dokument "' + title + '" skapat!')
