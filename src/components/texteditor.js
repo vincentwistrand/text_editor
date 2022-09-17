@@ -8,10 +8,10 @@ import 'react-quill/dist/quill.snow.css';
 import docsModel from "../models/docs"
 import Header from "./header";
 
-function TextEditor() {
-  const [content, setContent] = useState('');
-  const [name, setName] = useState('');
-  const [id, setId] = useState('');
+function TextEditor({testDoc={}}) {
+  const [content, setContent] = useState(testDoc.content || '');
+  const [name, setName] = useState(testDoc.name || '');
+  const [id, setId] = useState(testDoc._id || '');
   const [saved, setSaved] = useState('Spara');
   const location = useLocation();
 
