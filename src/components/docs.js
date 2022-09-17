@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import Header from "./header";
 import docsModel from "../models/docs";
 
-function Docs() {
-    const [docs, setDocs] = useState([]);
+function Docs({testDocs=[]}) {
+    const [docs, setDocs] = useState(testDocs);
     const [currentDoc, setCurrentDoc] = useState(null);
     const [title, setTitle] = useState("");
 
@@ -36,8 +36,6 @@ function Docs() {
     const handleInputChange = event => {
         setTitle(event.target.value);
     };
-
-    console.log(title);
 
     // Create new document in database.
     async function newDoc(title) {
