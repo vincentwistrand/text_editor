@@ -13,8 +13,8 @@ function TextEditor({testDoc={}}) {
   const [name, setName] = useState(testDoc.name || '');
   const [id, setId] = useState(testDoc._id || '');
   const [saved, setSaved] = useState('Spara');
-  const location = useLocation();
 
+  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
