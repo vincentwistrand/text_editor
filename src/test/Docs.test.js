@@ -2,10 +2,6 @@ import { render, screen } from '@testing-library/react';
 import Docs from '../components/docs';
 import {HashRouter as Router} from 'react-router-dom';
 
-
-
-jest.mock("../components/texteditor", () => "texteditor");
-
 const documents = [
   {
     _id: "6320a5a7129ba599acb3e8f2",
@@ -20,6 +16,16 @@ const documents = [
 ];
 
 test('renders create button', () => {
+
+  const docsModel = {
+    getAllDocs: async function getAllDocs() {
+        return {};
+    }
+  }
+
+  jest.mock("../components/header", () => "header");
+  jest.mock("../models/docs", () => docsModel);
+
   render(<Router>
             <Docs testDocs={documents} />
           </Router>);
@@ -30,6 +36,16 @@ test('renders create button', () => {
 });
 
 test('should display all document names', () => {
+
+  const docsModel = {
+    getAllDocs: async function getAllDocs() {
+        return {};
+    }
+  }
+
+  jest.mock("../components/header", () => "header");
+  jest.mock("../models/docs", () => docsModel);
+
   render(<Router>
             <Docs testDocs={documents} />
           </Router>);
