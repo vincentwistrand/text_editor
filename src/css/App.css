@@ -28,10 +28,39 @@ body {
 
 /* editor */
 
+trix-editor {
+  background-color: white!important;
+  min-height: 15em!important;
+  border: 1px solid #000!important;
+}
+
+trix-toolbar {
+  margin-top: 15px;
+}
+
+.trix-button-group {
+  border-bottom-color: #cbd5e1!important;
+  gap: 1px;
+}
+
+.trix-button {
+  border: 1px solid #000!important;
+  border-radius: 5px!important;
+}
+
+.ql-editor {
+	white-space: pre-wrap!important;
+}
+
+#res {
+  white-space: pre!important;
+}
+
 .editor-page {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+  padding-inline: 15px;
 }
 
 .editor-page h2 {
@@ -41,16 +70,9 @@ body {
 }
 
 .editor-buttons {
-  position: relative;
-  top: 35px;
+  /*position: relative;
+  top: 35px;*/
   margin-inline: 3px;
-}
-
-.Editor{
-   max-width: 800px;
-   margin-left: auto;
-   margin-right: auto;
-   border-color: black;
 }
 
 .ql-toolbar {
@@ -69,4 +91,23 @@ body {
 
 .Save {
   margin-bottom: 20px;
+}
+
+@media screen and (max-width: 730px) {
+  .editor-buttons {
+
+    margin-left: auto;
+    margin-right: auto;
+    position: unset;
+    margin-inline: 3px;
+  }
+
+  .editor-buttons-parent {
+    text-align: center;
+  }
+
+  .editor-page h2 {
+    position: unset;
+  }
+
 }
