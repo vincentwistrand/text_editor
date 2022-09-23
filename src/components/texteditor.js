@@ -25,7 +25,10 @@ function TextEditor({testDoc={}}) {
 
 
   useEffect(() => {
-    setSocket(io("https://jsramverk-editor-viai20.azurewebsites.net"));
+    if (!testDoc.content) {
+      setSocket(io("https://jsramverk-editor-viai20.azurewebsites.net"));
+    };
+    // eslint-disable-next-line
   }, []);
 
 
@@ -149,6 +152,7 @@ function TextEditor({testDoc={}}) {
       setContent(newValue);
     }
   }
+  
   
   return (
     <>
