@@ -12,6 +12,7 @@ function Docs({testDocs=[]}) {
 
     const navigate = useNavigate();
 
+
     // Get all documents.
     useEffect(() => {
         (async () => {
@@ -20,10 +21,12 @@ function Docs({testDocs=[]}) {
         })();
     }, []);
 
+
     // Set current document.
     const handleOptionsChange = event => {
         setCurrentDoc(docs[event.target.value]);
     };
+
 
     // Open document in editor.
     const openDoc = () => {
@@ -32,10 +35,12 @@ function Docs({testDocs=[]}) {
         }
     };
 
+
     // SetTitle of new document.
     const handleInputChange = event => {
         setTitle(event.target.value);
     };
+
 
     // Create new document in database.
     async function newDoc(title) {
@@ -48,6 +53,7 @@ function Docs({testDocs=[]}) {
         window.location.reload(false);
     }
 
+    
   return (
     <>
     <div className='docs'>
