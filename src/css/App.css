@@ -48,14 +48,6 @@ trix-toolbar {
   border-radius: 5px!important;
 }
 
-.ql-editor {
-	white-space: pre-wrap!important;
-}
-
-#res {
-  white-space: pre!important;
-}
-
 .editor-page {
   max-width: 800px;
   margin-left: auto;
@@ -73,20 +65,6 @@ trix-toolbar {
   /*position: relative;
   top: 35px;*/
   margin-inline: 3px;
-}
-
-.ql-toolbar {
-  border-left-color: #cbd5e1 !important;
-  border-right-color: #cbd5e1 !important;
-  border-top-color: #cbd5e1 !important;
-  border-bottom-color: black !important;
-  text-align: center;
-}
-
-.ql-container {
-  border-color: black !important;
-  min-height: 200px;
-  background-color: white;
 }
 
 .Save {
