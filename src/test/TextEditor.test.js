@@ -30,7 +30,7 @@ test('should contain document content', () => {
   
     const option2 = screen.getByText("Halloj");
     expect(option2).toBeInTheDocument();
-  });
+});
 
 test('renders save button', () => {
 
@@ -40,4 +40,4 @@ test('renders save button', () => {
   
     const createButton = screen.getByRole("button", { name: /Spara/i });
     expect(createButton).toBeInTheDocument();
-  });
+});
