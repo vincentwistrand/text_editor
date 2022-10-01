@@ -5,6 +5,8 @@ import {HashRouter as Router} from 'react-router-dom';
 jest.mock("../components/header", () => "header");
 jest.mock("../models/docs", () => "docs");
 
+
+
 const document = 
     {
       _id: "6320a5a7129ba599acb3e8f2",
@@ -25,7 +27,7 @@ const user = {
 test('should contain document name', () => {
 
   render(<Router>
-            <TextEditor currentDoc={document} user={user} />
+            <TextEditor testDoc={{test: "test"}} currentDoc={document} user={user} />
           </Router>);
   
   const option1 = screen.getByText("Doc 1");
@@ -35,7 +37,7 @@ test('should contain document name', () => {
 test('should contain document content', () => {
 
     render(<Router>
-              <TextEditor currentDoc={document} user={user} />
+              <TextEditor testDoc={{test: "test"}} currentDoc={document} user={user} />
             </Router>);
   
     const option2 = screen.getByText("Halloj");
@@ -45,7 +47,7 @@ test('should contain document content', () => {
 test('renders save button', () => {
 
     render(<Router>
-              <TextEditor currentDoc={document} user={user} />
+              <TextEditor testDoc={{test: "test"}} currentDoc={document} user={user} />
             </Router>);
   
     const createButton = screen.getByRole("button", { name: /Spara/i });
