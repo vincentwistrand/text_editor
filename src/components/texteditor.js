@@ -40,7 +40,7 @@ function TextEditor({
   const [authUsers, setAuthUsers] = useState("");
 
   useEffect(() => {
-    if (!testDoc.content) {
+    if (!testDoc) {
       setSocket(io("https://jsramverk-editor-viai20.azurewebsites.net"));
     };
     // eslint-disable-next-line
@@ -87,6 +87,7 @@ function TextEditor({
   }, []);
 
 
+
   // When content change, emit content if 
   // content change is not caused by socket.
   useEffect(() => {
@@ -106,6 +107,7 @@ function TextEditor({
     }
     // eslint-disable-next-line
   }, [content])
+
 
 
   // From socket.
@@ -130,6 +132,7 @@ function TextEditor({
 
     };
   }, [socket]);
+
 
 
   // Save changes in document to database.
