@@ -1,46 +1,85 @@
 // Fetch docs from backend
 
+//const baseURL = "http://localhost:1337";
+const baseURL = "https://jsramverk-editor-viai20.azurewebsites.net";
+
 const docsModel = {
-    getAllDocs: async function getAllDocs() {
-        const response = await fetch(`https://jsramverk-editor-viai20.azurewebsites.net/docs`);
-        //const response = await fetch(`http://localhost:1337/docs`);
+    getAllDocs: async function getAllDocs(token) {
+        const response = await fetch(`${baseURL}/docs`, {
+            headers: {
+                "x-access-token": token,
+            }
+        });
         const result = await response.json();
 
         return result.data;
     },
-    saveDoc: async function saveDoc(doc) {
-        const requestOptions = {
-            method: 'PUT'
-        };
-        const query = `id=${doc.id}&name=${doc.name}&content=${doc.content}`;
+
+
+    getUserDocs: async function getUserDocs(token, email) {
+        const query = `email=${email}`;
+
+        const response = await fetch(`${baseURL}/userdocs?${query}`, {
+            headers: {
+                "x-access-token": token,
+            }
+        });
+        const result = await response.json();
+
+        return result.data;
+    },
+
+
+    saveDoc: async function saveDoc(doc, token) {
+        const dokument = {
+            id: doc._id,
+            name: doc.name,
+            content: doc.content,
+            access: doc.access
+        }
+
+        const response = await fetch(`${baseURL}/docs`, {
+            method: "PUT",
+            body: JSON.stringify(dokument),
+            headers: {
+                "content-type": "application/json",
+                "x-access-token": token,
+            },
+        });
         
-        const response = await fetch(`https://jsramverk-editor-viai20.azurewebsites.net/docs?${query}`, requestOptions);
-        //const response = await fetch(`http://localhost:1337/docs?${query}`, requestOptions);
         const result = await response.json();
 
         return result.data;
     },
-    createDoc: async function createDoc(doc) {
+
+
+
+    createDoc: async function createDoc(doc, token) {
         const requestOptions = {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                "x-access-token": token,
+            }
         };
-        const query = `name=${doc.name}`;
+        const query = `user=${doc.user}&name=${doc.name}`;
         
-        const response = await fetch(`https://jsramverk-editor-viai20.azurewebsites.net/docs?${query}`, requestOptions);
-        //const response = await fetch(`http://localhost:1337/docs?${query}`, requestOptions);
+        const response = await fetch(`${baseURL}/docs?${query}`, requestOptions);
         const result = await response.json();
 
         return result.data;
     },
-    deleteDoc: async function deleteDoc(doc) {
+
+
+    deleteDoc: async function deleteDoc(doc, token) {
         const requestOptions = {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                "x-access-token": token,
+            }
         };
         const query = `id=${doc.id}`;
         
-        await fetch(`https://jsramverk-editor-viai20.azurewebsites.net/docs?${query}`, requestOptions);
-        //await fetch(`http://localhost:1337/docs?${query}`, requestOptions);
-
+        await fetch(`${baseURL}/docs?${query}`, requestOptions);
     }
 };
 
