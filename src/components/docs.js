@@ -54,6 +54,7 @@ function Docs({testDocs=[], user=[], token}) {
         setCurrentDocUser(userDocs[event.target.value]);
     };
 
+    
     // Set current authorized document.
     const handleOptionsChangeAuth = event => {
         setCurrentDocAuth(docs[event.target.value]);
