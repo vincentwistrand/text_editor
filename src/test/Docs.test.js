@@ -60,12 +60,9 @@ test('should display all document names', () => {
             <Docs testDocs={documents} user={user} token="" />
           </Router>);
 
-  const option1 = screen.getByRole('option', { name: "Doc 1" });
+  const option1 = screen.getByText("Doc 1");
   expect(option1).toBeInTheDocument();
 
-  const option2 = screen.getByRole('option', { name: "Doc 2" });
+  const option2 = screen.getByText("Doc 2");
   expect(option2).toBeInTheDocument();
-
-  const options = screen.getAllByRole('option');
-  expect(options.length).toBe(4);
 });
