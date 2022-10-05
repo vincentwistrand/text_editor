@@ -5,7 +5,7 @@
 
 body {
   background-color: #cbd5e1;
-  font-family: 'Varela Round', sans-serif;
+
   box-sizing: border-box;
   font-weight: bold;
 }
@@ -131,17 +131,113 @@ body {
 
 /* docs */
 
-.docs {
+.docsContainer,
+.usersContainer {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+
+.docIcon:hover {
+  transform: translateY(2px);
+}
+
+.docIcon,
+.userIcon {
+  width: 120px;
+  height: 125px;
+  border-radius: 5px;
   text-align: center;
 }
 
+.logoutIcon {
+  width: 100px;
+  height: 125px;
+  border-radius: 5px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.docIcon {
+  cursor: pointer;
+}
+
+.docIcon img,
+.userIcon img,
+.logoutIcon img {
+  width: 70px;
+  margin-top: 15px;
+}
+
+.userIcon {
+  padding-inline: 20px;
+}
+
+.docIcon p,
+.userIcon p,
+.logoutIcon p {
+  margin: 0;
+}
+
+.docs {
+  text-align: center;
+  position: relative;
+  bottom: 200px;
+}
+
+
 .create_alert {
+  text-align: center;
   color: green;
   font-size: 12px;
+  max-width: 150px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .docs h2 {
   margin-bottom: 10px;
+  margin-top: 30px;
+}
+
+.createDocInput input {
+  padding: 8px 10px;
+  margin: 8px 10px;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.createDocInput button,
+.logout {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 15px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout {
+  margin: 20px 0 0;
+  background-color:   #498bf4;
+}
+
+.createDocInput button:hover,
+.logout:hover {
+  transform: translateY(1px);
+}
+
+.createDocInput button:active,
+.logout:hover {
+  transform: translateY(2px);
 }
 
 
@@ -173,6 +269,8 @@ trix-toolbar {
   margin-left: auto;
   margin-right: auto;
   padding-inline: 15px;
+  position: relative;
+  bottom: 200px;
 }
 
 .editor-page h2 {
@@ -191,9 +289,59 @@ trix-toolbar {
   margin-bottom: 20px;
 }
 
+.back-button,
+.save-button,
+.delete-button {
+  color: white;
+  padding: 8px 15px;
+  margin: 8px 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.back-button:hover,
+.save-button:hover,
+.delete-button:hover {
+  transform: translateY(1px);
+}
+
+.back-button:active,
+.save-button:active,
+.delete-button:active {
+  transform: translateY(1px);
+}
+
+.back-button {
+  background-color: #498bf4;
+}
+
+.save-button {
+  background-color: #498bf4;
+}
+
+.delete-button {
+  background-color: rgb(189, 0, 0);
+}
+
+.access-container input {
+  padding: 8px 10px;
+  margin: 8px 10px 0 0 ;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
 
 
 /* media-queries */
+
+@media screen and (max-width: 1150px) {
+  .editor-page {
+    bottom: 0!important;
+  }
+}
 
 @media screen and (max-width: 730px) {
   .editor-buttons {
@@ -210,6 +358,14 @@ trix-toolbar {
 
   .editor-page h2 {
     position: unset;
+  }
+
+  .editor-page {
+    bottom: 0!important;
+  }
+
+  .docs {
+    bottom: 0!important;
   }
 
 }
