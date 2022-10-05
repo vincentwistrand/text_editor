@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import TextEditor from "./texteditor";
 import docsModel from "../models/docs";
 import authModel from '../models/auth';
+import docLogo from '../img/docLogo.png';
+import userLogo from '../img/userLogo.png';
 
 function Docs({testDocs=[], user=[], token}) {
     const [currentUser] = useState(user);
@@ -11,8 +13,6 @@ function Docs({testDocs=[], user=[], token}) {
     const [userDocs, setUserDocs] = useState(testDocs);
     const [usersAndDocs, setUsersAndDocs] = useState([]);
     const [currentDoc, setCurrentDoc] = useState(null);
-    const [currentDocUser, setCurrentDocUser] = useState(null);
-    const [currentDocAuth, setCurrentDocAuth] = useState(null);
     const [allUsers, setAllUsers] = useState([]);
     const [title, setTitle] = useState("");
     const [editorMode, setEditorMode] = useState(null);
@@ -24,60 +24,32 @@ function Docs({testDocs=[], user=[], token}) {
     //const [selectedUserDocsMapped, setSelectedUserDocsMapped] = useState([]);
 
 
-    // If admin get all users and docs, if ordinary user get only your own docs.
+    // Get all docs, if admin also get all users.
     useEffect(() => {
         (async () => {
+            const userDocuments = await docsModel.getUserDocs(token, currentUser.email);
+            const allDocs = await docsModel.getAllDocs(token);
+
+            setUserDocs(userDocuments);
+            setDocs(allDocs);
+
             if (currentUser.admin === true) {
                 const users = await authModel.getUsers();
-                const allDocs = await docsModel.getAllDocs(token);
-                const userDocuments = allDocs.filter(doc => {
-                    return doc.user === currentUser.email;
-                });
-
-                setAllUsers(users.data);
-                setDocs(allDocs);
-                setUserDocs(userDocuments);
-            } else {
-                const userDocuments = await docsModel.getUserDocs(token, currentUser.email);
-                setUserDocs(userDocuments);
-
-                const allDocs = await docsModel.getAllDocs(token);
-                setDocs(allDocs);
+                setAllUsers(users);
             }
         })();
         // eslint-disable-next-line
     }, []);
 
 
-    // Set current user document.
-    const handleOptionsChangeUser = event => {
-        setCurrentDocUser(userDocs[event.target.value]);
-    };
-
-    
-    // Set current authorized document.
-    const handleOptionsChangeAuth = event => {
-        setCurrentDocAuth(docs[event.target.value]);
-    };
-
 
     // Open one of your own documents.
-    const openDocUser = () => {
-        if (currentDocUser) {
-            setOwner(true);
-            setCurrentDoc(currentDocUser);
-            setEditorMode(true);
-        }
+    const openDoc = (doc) => {
+        setOwner(true);
+        setCurrentDoc(doc);
+        setEditorMode(true);
     };
 
-    // Open a document you have been given access to.
-    const openDocAuth = () => {
-        if (currentDocAuth) {
-            setOwner(false);
-            setCurrentDoc(currentDocAuth);
-            setEditorMode(true);
-        }
-    };
 
 
     // SetTitle of new document.
@@ -143,14 +115,24 @@ function Docs({testDocs=[], user=[], token}) {
             });
             const allUsersDocs = allDocs.map((doc, index) => <p key={doc._id} style={{fontSize: '11px', margin: '0'}}>{doc.name}.doc</p>);
             
-            return  <div key={index}>
-                        <h4 style={{marginBottom: '0'}} key={user._id}><u>{specificUser.email}</u></h4>
+            return  <div key={index} className='userIcon'>
+                        <img key={user._id} src={userLogo} alt={"user logo"} />
+                        <p  key={user.email}>{specificUser.email}</p>
                         {allUsersDocs}
                     </div>
         })
         setUsersAndDocs(uAD);
         // eslint-disable-next-line
     }, [allUsers]);
+
+
+    // Render doc icon
+    function docIcon(doc, index) {
+        return  <div key={index} className='docIcon' onClick={() => openDoc(doc)}>
+                    <img src={docLogo}  alt={"document logo"}/>
+                    <p>{doc.name}</p>
+                </div>
+    }
 
 
   return (
@@ -169,43 +151,26 @@ function Docs({testDocs=[], user=[], token}) {
             />
         :
             <>
-            <p style={{marginLeft: '20px'}}><u>Inloggad som:</u> {currentUser.email}</p>
-            {user.admin === true ? <p style={{marginLeft: '20px'}}>admin</p>:<p style={{marginLeft: '20px'}}>not admin</p>}
-            <button style={{marginLeft: '20px'}} onClick={() => window.location.reload(false)}>Logga ut</button>
+            <div style={{ width: '150px', marginLeft: '20px', textAlign: 'center' }}>
+                <button className='logout' onClick={() => window.location.reload(false)}>Logga ut</button>
+                <div style={{textAlign: 'center'}} className='logoutIcon'>
+                    <img src={userLogo}  alt={"user logo"}/>
+                    <p>{currentUser.email}</p>
+                </div>
+                {user.admin === true ? <p>admin</p>:<p style={{marginLeft: '20px'}}>not admin</p>}
+            </div>
+            
+
             <div className='docs'>
                 {!createAlert ? 
-                <div style={{height: '26px'}}></div>
-                :
-                <p className='create_alert'>{createAlert}</p>
+                    <div style={{height: '16px'}}></div>
+                    :
+                    <div className='create_alert'>{createAlert}</div>
                 }
 
-                <h2>Dina dokument:</h2>
+                <h2>Skapa ett nytt dokument</h2>
 
-                <select onChange={handleOptionsChangeUser}>
-                    <option value="-99" key="0">Välj ett dokument</option>
-                    {userDocs.map((doc, index) => <option value={index} key={index}>{doc.name}</option>)}
-                </select>
-
-                <button onClick={openDocUser}>Öppna</button><br></br><br></br>
-
-                <h2>Dokument du givits tillgång till:</h2>
-
-                <select onChange={handleOptionsChangeAuth}>
-                    <option value="-99" key="0">Välj ett dokument</option>
-                    {docs.map((doc, index) => {
-
-                        if (doc.access.includes(user.email)) {
-                            return <option value={index} key={index}>{doc.name}</option>
-                        }
-                        return null;
-                    })}
-                </select>
-
-                <button onClick={openDocAuth}>Öppna</button><br></br><br></br>
-    
-                <h2>Skapa ett nytt dokument:</h2>
-
-                <div>
+                <div className='createDocInput'>
                     <input
                         type="text"
                         id="message"
@@ -213,17 +178,41 @@ function Docs({testDocs=[], user=[], token}) {
                         onChange={handleInputChange}
                         value={title}
                         autoComplete="off"
-                        placeholder='Dokumentnamn'
+                        placeholder='Titel'
                     />
 
-                    <button onClick={() => newDoc(title)}>Skapa</button><br></br><br></br>
+                    <button onClick={() => newDoc(title)}>Skapa</button>
                 </div>
+
+                <p>_____________</p>
+
+                <h2>Dina dokument</h2>
+
+                <div className='docsContainer'>
+                    {userDocs.map((doc, index) => docIcon(doc, index))}
+                </div>
+
+                <p>_____________</p>
+
+                <h2>Dokument du givits tillgång till</h2>
+                <div className='docsContainer'>
+                    {docs.map((doc, index) => {
+                        if (doc.access.includes(user.email)) {
+                            return  docIcon(doc, index);
+                        } else {
+                            return null;
+                        }   
+                    })}
+                </div>
+
+                <p>_____________</p>
 
                 {user.admin === true ?
                     <>
                     <h2>Alla användare och deras dokument:</h2>
-
-                    {usersAndDocs}
+                    <div className='usersContainer'>
+                        {usersAndDocs}
+                    </div>
 
                     </>
                 :<p></p>}
@@ -235,7 +224,3 @@ function Docs({testDocs=[], user=[], token}) {
 }
 
 export default Docs;
-
-//<button onClick={openDocAll}>Öppna</button><br></br><br></br>
-
-//{usersAndDocs}
