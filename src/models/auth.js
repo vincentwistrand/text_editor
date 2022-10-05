@@ -1,24 +1,27 @@
-//const baseURL = "http://localhost:1337";
-const baseURL = "https://jsramverk-editor-viai20.azurewebsites.net";
+const baseURL = "http://localhost:1337";
+//const baseURL = "https://jsramverk-editor-viai20.azurewebsites.net";
 
 const authModel = {
-    token: "",
     getUsers: async function getUsers() {
-        const response = await fetch(`${baseURL}/auth/users`, {
-            method: "GET",
-            headers: {
-                "content-type": "application/json"
-            },
-        });
+        const query = "{ users { _id email password admin } }";
 
-        const result = await response.json();
-        return result;
+        const result = fetch(`${baseURL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ query: query })
+        })
+            .then(r => r.json())
+            .then(result => {return result.data.users});
+        return result
     },
 
     getUser: async function getUser(id) {
         const users = await authModel.getUsers();
 
-        const user = users.data.filter(user => {
+        const user = users.filter(user => {
             return user._id === id;
           });
 
@@ -28,7 +31,7 @@ const authModel = {
     getUserByEmail: async function getUser(email) {
         const users = await authModel.getUsers();
 
-        const user = users.data.filter(user => {
+        const user = users.filter(user => {
             return user.email === email;
           });
 
