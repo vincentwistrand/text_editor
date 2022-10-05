@@ -1,32 +1,44 @@
 // Fetch docs from backend
 
-//const baseURL = "http://localhost:1337";
-const baseURL = "https://jsramverk-editor-viai20.azurewebsites.net";
+const baseURL = "http://localhost:1337";
+//const baseURL = "https://jsramverk-editor-viai20.azurewebsites.net";
 
 const docsModel = {
     getAllDocs: async function getAllDocs(token) {
-        const response = await fetch(`${baseURL}/docs`, {
-            headers: {
-                "x-access-token": token,
-            }
-        });
-        const result = await response.json();
+        const query = "{ docs { _id user name content access } }";
 
-        return result.data;
+        const result = fetch(`${baseURL}/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                "x-access-token": token,
+            },
+            body: JSON.stringify({ query: query })
+        })
+            .then(r => r.json())
+            .then(result => {return result.data.docs});
+        
+        return result
     },
 
 
     getUserDocs: async function getUserDocs(token, email) {
-        const query = `email=${email}`;
+        const query = `{ matchingdocs(user: "${email}") { _id user name content access } }`;
 
-        const response = await fetch(`${baseURL}/userdocs?${query}`, {
+        const result = fetch(`${baseURL}/graphql`, {
+            method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 "x-access-token": token,
-            }
-        });
-        const result = await response.json();
-
-        return result.data;
+            },
+            body: JSON.stringify({ query: query })
+        })
+            .then(r => r.json())
+            .then(result => {return result.data.matchingdocs});
+        
+        return result
     },
 
 
