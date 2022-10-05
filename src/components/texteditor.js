@@ -1,4 +1,5 @@
 import '../css/App.css';
+import userLogo from '../img/userLogo.png';
 
 import React, { useState, useEffect } from 'react';
 
@@ -25,11 +26,10 @@ function TextEditor({
                     })
 {
   const [currentUser] = useState(user);
-  const [currentDocument] = useState(currentDoc);
+  const [currentDocument, setCurrentDocument] = useState(currentDoc);
   const [content, setContent] = useState('');
   const [name, setName] = useState(testDoc.name || '');
   const [id, setId] = useState(testDoc._id || '');
-  const [access, setAccess] = useState([]);
   const [saved, setSaved] = useState('');
   const [socket, setSocket] = useState(null);
   const [fromSocket, setFromSocket] = useState(true);
@@ -57,10 +57,15 @@ function TextEditor({
 
 
   useEffect(() => {
-    const users = access.map((user, index) => <p value={index} key={index}>{user}</p>)
+    const users = currentDocument.access.map((user, index) => {
+          return  <div key={index} className='userIcon'>
+                    <img src={userLogo}  alt={"user logo"}/>
+                    <p>{user}</p>
+                  </div>
+    })
     setAuthUsers(users);
     // eslint-disable-next-line
-  }, [access]);
+  }, [currentDocument]);
 
 
   
@@ -77,7 +82,6 @@ function TextEditor({
         setContent(currentDocument.content);
         setName(currentDocument.name);
         setId(currentDocument._id);
-        setAccess(currentDocument.access);
 
         element.value = currentDocument.content;
       }
@@ -172,7 +176,6 @@ function TextEditor({
 
 
 
-
   // Delete document from database.
   async function deleteDocument() {
     setSaved("Raderar...");
@@ -222,18 +225,25 @@ function TextEditor({
 
   // Add clearance to document for a user.
   async function addUser() {
+    setSaved("Arbetar...");
     const user = await authModel.getUserByEmail(input);
 
     if (user) {
-      if (!access.includes(input)) {
+      if (!currentDocument.access.includes(input)) {
         const doc = currentDocument;
         doc.access.push(input);
         await docsModel.saveDoc(doc, token);
 
-        setAccess(doc.access);
+        setCurrentDocument(doc);
 
-        const users = doc.access.map((user, index) => <p value={index} key={index}>{user}</p>)
+        const users = doc.access.map((user, index) => {
+          return  <div key={index} className='userIcon'>
+                    <img src={userLogo}  alt={"user logo"}/>
+                    <p>{user}</p>
+                  </div>
+        })
         setAuthUsers(users);
+
 
         setInput("");
         setSaved("Användaren har fått behörighet.")
@@ -259,23 +269,33 @@ function TextEditor({
 
   // Remove clearance for a user.
   async function removeUser() {
+    setSaved("Arbetar...");
     const user = await authModel.getUserByEmail(input);
     if (user) {
-      console.log(input)
-      if (access.includes(input)) {
+      if (currentDocument.access.includes(input)) {
         const doc = currentDocument;
 
         var filtered = doc.access.filter(function(value, index, arr){ 
-          if (!value === currentUser.email) {
+          if (value !== input) {
             return value
+          } else {
+            return null;
           }
-          return null;
         });
+
         doc.access = filtered;
-
-        setAccess(filtered);
-
         await docsModel.saveDoc(doc, token);
+
+        setCurrentDocument(doc);
+
+        const users = doc.access.map((user, index) => {
+          return  <div key={index} className='userIcon'>
+                    <img src={userLogo}  alt={"user logo"}/>
+                    <p>{user}</p>
+                  </div>
+        })
+        setAuthUsers(users);
+
         
         setInput("");
 
@@ -303,9 +323,17 @@ function TextEditor({
   
   return (
     <>
-    <p style={{marginLeft: '20px'}}><u>Inloggad som:</u> {currentUser.email}</p>
-    <div className='editor-page'>
+    <div style={{ width: '150px', marginLeft: '20px', textAlign: 'center' }}>
+      <button className='logout' onClick={() => window.location.reload(false)}>Logga ut</button>
+      <div style={{textAlign: 'center'}} className='logoutIcon'>
+          <img src={userLogo}  alt={"user logo"}/>
+          <p>{currentUser.email}</p>
+      </div>
+      {user.admin === true ? <p>admin</p>:<p style={{marginLeft: '20px'}}>not admin</p>}
+    </div>
 
+
+    <div className='editor-page'>
         <h2>{name}</h2>
 
         <p>Ägare: {currentDocument.user}</p>
@@ -314,9 +342,9 @@ function TextEditor({
             saved == "" ? <div style={{height: '37px'}}></div>:
             <p className="editor-buttons" style={{color: 'green'}}>{saved}</p>
           }
-          <button className="editor-buttons" onClick={goBack}>Tillbaka</button>
-          <button className="editor-buttons" onClick={save}>Spara</button>
-          <button className='editor-buttons editor-delete' onClick={deleteDocument}>Radera</button>
+          <button className="editor-buttons back-button" onClick={goBack}>Tillbaka</button>
+          <button className="editor-buttons save-button" onClick={save}>Spara</button>
+          <button className='editor-buttons editor-delete delete-button' onClick={deleteDocument}>Radera</button>
         </div>
 
         <ReactTrixRTEToolbar toolbarId="react-trix-rte-editor" />
@@ -326,7 +354,7 @@ function TextEditor({
         /><br></br><br></br>
 
         {owner === true ?
-        <div>
+        <div className='access-container'>
           Ge eller ta bort behörighet för användare:<br></br><input
             type="text"
             id="message"
@@ -337,11 +365,13 @@ function TextEditor({
             placeholder='Email'
           />
 
-          <button onClick={addUser} >Lägg till</button>
-          <button onClick={removeUser} >Ta bort</button><br></br><br></br>
+          <button className='back-button' onClick={addUser} >Lägg till</button>
+          <button className='delete-button' onClick={removeUser} >Ta bort</button><br></br><br></br>
 
           <h3>Behöriga:</h3>
-          {authUsers}
+          <div className='usersContainer'>
+              {authUsers}
+          </div>
         </div>
         :
           <p></p>
