@@ -1,50 +1,94 @@
 import '../css/App.css';
 import userLogo from '../img/userLogo.png';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import "trix";
 import { ReactTrixRTEInput, ReactTrixRTEToolbar } from "react-trix-rte";
-
-import docsModel from "../models/docs"
+import { useReactToPrint } from "react-to-print";
 
 import { io } from "socket.io-client";
-import authModel from '../models/auth';
+
+import Editor from "@monaco-editor/react";
+
+import docsModel from "../models/docs";
+import editorModel from '../models/texteditor';
+import codeModel from '../models/code';
+
+require("jspdf-autotable");
 
 
 function TextEditor({
                       testDoc={},
                       user,
-                      docs,
                       currentDoc,
-                      setCurrentDoc,
                       token,
                       owner,
+                      editorType,
                       setEditorMode,
                       setDocs,
                       setUserDocs
                     })
 {
+  // Set user and content
   const [currentUser] = useState(user);
   const [currentDocument, setCurrentDocument] = useState(currentDoc);
   const [content, setContent] = useState('');
-  const [name, setName] = useState(testDoc.name || '');
+  const [title, setTitle] = useState(testDoc.name || '');
   const [id, setId] = useState(testDoc._id || '');
+
+  const [test] = useState(testDoc.test || '');
+
+  // Show when saving
   const [saved, setSaved] = useState('');
+
+  // Manage socket
   const [socket, setSocket] = useState(null);
   const [fromSocket, setFromSocket] = useState(true);
   const [fromSocketCount, setfromSocketCount] = useState(0);
 
-  const [input, setInput] = useState("");
+  const [codeResponse, setCodeResponse] = useState("");
 
+  // Input from give access field
+  const [inputAccess, setInputAccess] = useState("");
+
+  // Input from invite field
+  const [inputInvite, setInputInvite] = useState("");
+
+  // Display message above invitation input.
+  const [invitationStatus, setInvitationStatus] = useState(null);
+  const [invitationMessage, setInvitationMessage] = useState(null);
+
+  // Display message above give access to user input.
+  const [accessStatus, setAccessStatus] = useState(null);
+  const [accessMessage, setAccessMessage] = useState(null);
+
+  // All users who have access to the document
   const [authUsers, setAuthUsers] = useState("");
 
+
+  // Print PDF
+  const componentRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
+  function managePrint() {
+    const html = document.getElementsByClassName("htmlContent");
+    html[0].style.display = "block";
+    handlePrint();
+    html[0].style.display = "none";
+  }
+
+
   useEffect(() => {
-    if (!testDoc) {
-      setSocket(io("https://jsramverk-editor-viai20.azurewebsites.net"));
+    if (!test) {
+      //setSocket(io("https://jsramverk-editor-viai20.azurewebsites.net"));
+      setSocket(io("localhost:1337"));
     };
     // eslint-disable-next-line
   }, []);
+
 
 
   useEffect(() => {
@@ -73,6 +117,7 @@ function TextEditor({
   useEffect(() => {
     (async () => {
       let element = document.querySelector("trix-editor");
+      const html = document.getElementsByClassName("htmlContent");
 
       if (testDoc.content) {
         element.value = testDoc.content;
@@ -80,10 +125,14 @@ function TextEditor({
 
       if (currentDocument) {
         setContent(currentDocument.content);
-        setName(currentDocument.name);
+        setTitle(currentDocument.name);
         setId(currentDocument._id);
 
-        element.value = currentDocument.content;
+        if (editorType === "text") {
+          element.value = currentDocument.content;
+        }
+
+        html[0].style.display = "none";
       }
 
     })();
@@ -122,6 +171,7 @@ function TextEditor({
       socket.on("doc", (data) => {
         setFromSocket(true);
         let element = document.querySelector("trix-editor");
+
         element.value = data.html;
       });
 
@@ -205,125 +255,91 @@ function TextEditor({
 
 
 
-  //
+  // Set editor content
   function handleChange(event, newValue) {
     if (newValue !== content) {
       setContent(newValue);
     }
   }
 
+  // Set content of code editor.
+  function handleCodeEditorChange(value, event) {
+    setContent(value);
+  }
 
-
-
-  // Set editor input to state.
-  const handleInputChange = event => {
-    setInput(event.target.value);
+  // Handle input from access field
+  const handleInputChangeAccess = event => {
+    setInputAccess(event.target.value);
   };
 
+  // Handle input from invite field
+  const handleInputChangeInvite = event => {
+    setInputInvite(event.target.value);
+  };
+
+  const runCode = async () => {
+    const response = await codeModel.postCode(content);
+    console.log(response)
+    setCodeResponse(response);
+  }
 
 
 
-  // Add clearance to document for a user.
+  // Send invite
+  async function sendInvite() {
+    if (inputInvite) {
+      await editorModel.sendInvite(
+        inputInvite,
+        title,
+        token,
+        currentDocument,
+        currentUser,
+        setCurrentDocument,
+        setAuthUsers,
+        setInputInvite,
+        setInvitationMessage,
+        setInvitationStatus
+      );
+    }
+  }
+
+  // Add user access
   async function addUser() {
-    setSaved("Arbetar...");
-    const user = await authModel.getUserByEmail(input);
-
-    if (user) {
-      if (!currentDocument.access.includes(input)) {
-        const doc = currentDocument;
-        doc.access.push(input);
-        await docsModel.saveDoc(doc, token);
-
-        setCurrentDocument(doc);
-
-        const users = doc.access.map((user, index) => {
-          return  <div key={index} className='userIcon'>
-                    <img src={userLogo}  alt={"user logo"}/>
-                    <p>{user}</p>
-                  </div>
-        })
-        setAuthUsers(users);
-
-
-        setInput("");
-        setSaved("Användaren har fått behörighet.")
-        setTimeout(() => {
-          setSaved("");
-        }, 3000);
-
-      } else {
-        setSaved("Användaren har redan behörighet.")
-        setTimeout(() => {
-          setSaved("");
-        }, 3000);
-      }
-    } else {
-      setSaved("Användaren finns inte.")
-      setTimeout(() => {
-        setSaved("");
-      }, 3000);
+    if (inputAccess) {
+      await editorModel.addUser(
+        inputAccess,
+        token,
+        currentDocument,
+        setCurrentDocument,
+        setAuthUsers,
+        setInputAccess,
+        setAccessMessage,
+        setAccessStatus
+      );
     }
-  };
+  }
 
-
-
-  // Remove clearance for a user.
+  // Remove user access
   async function removeUser() {
-    setSaved("Arbetar...");
-    const user = await authModel.getUserByEmail(input);
-    if (user) {
-      if (currentDocument.access.includes(input)) {
-        const doc = currentDocument;
-
-        var filtered = doc.access.filter(function(value, index, arr){ 
-          if (value !== input) {
-            return value
-          } else {
-            return null;
-          }
-        });
-
-        doc.access = filtered;
-        await docsModel.saveDoc(doc, token);
-
-        setCurrentDocument(doc);
-
-        const users = doc.access.map((user, index) => {
-          return  <div key={index} className='userIcon'>
-                    <img src={userLogo}  alt={"user logo"}/>
-                    <p>{user}</p>
-                  </div>
-        })
-        setAuthUsers(users);
-
-        
-        setInput("");
-
-        setSaved("Användarens behörighet har tagits bort.")
-        setTimeout(() => {
-          setSaved("");
-        }, 3000);
-      } else {
-        setSaved("Användaren har inte behörighet.")
-        setTimeout(() => {
-          setSaved("");
-        }, 3000);
-      }
-    } else {
-      setSaved("Användaren finns inte.")
-      setTimeout(() => {
-        setSaved("");
-      }, 3000);
-
+    if (inputAccess) {
+      await editorModel.removeUser(
+        inputAccess,
+        token,
+        currentDocument,
+        setCurrentDocument,
+        setAuthUsers,
+        setInputAccess,
+        setAccessMessage,
+        setAccessStatus
+      );
     }
-  };
-
+  }
 
 
   
   return (
     <>
-    <div style={{ width: '150px', marginLeft: '20px', textAlign: 'center' }}>
+    <div style={{ width: '200px', marginLeft: '20px', textAlign: 'center' }}>
       <button className='logout' onClick={() => window.location.reload(false)}>Logga ut</button>
       <div style={{textAlign: 'center'}} className='logoutIcon'>
           <img src={userLogo}  alt={"user logo"}/>
@@ -334,48 +350,109 @@ function TextEditor({
 
 
     <div className='editor-page'>
-        <h2>{name}</h2>
+        <div className='editor-title-container'>
+            <h1>{title}</h1>
 
-        <p>Ägare: {currentDocument.user}</p>
+            <p>Ägare: {currentDocument.user}</p>
+
+            {// eslint-disable-next-line 
+              saved == "" ? <div style={{height: '34px'}}></div>:
+              <p className="editor-buttons" style={{color: 'green'}}>{saved}</p>
+            }
+        </div>
+
         <div className="editor-buttons-parent">
-          {// eslint-disable-next-line 
-            saved == "" ? <div style={{height: '37px'}}></div>:
-            <p className="editor-buttons" style={{color: 'green'}}>{saved}</p>
-          }
           <button className="editor-buttons back-button" onClick={goBack}>Tillbaka</button>
           <button className="editor-buttons save-button" onClick={save}>Spara</button>
+          {editorType === "text" && <button onClick={() => managePrint()} className="editor-buttons back-button">PDF</button> }
           <button className='editor-buttons editor-delete delete-button' onClick={deleteDocument}>Radera</button>
         </div>
 
-        <ReactTrixRTEToolbar toolbarId="react-trix-rte-editor" />
-        <ReactTrixRTEInput
-          toolbarId="react-trix-rte-editor"
-          onChange={handleChange}
-        /><br></br><br></br>
+        {editorType === "text" &&
+          <>
+            <ReactTrixRTEToolbar toolbarId="react-trix-rte-editor"/>
+            <ReactTrixRTEInput
+              toolbarId="react-trix-rte-editor"
+              value={content}
+              onChange={handleChange}
+            /><br></br><br></br>
+          </>
+        }
 
-        {owner === true ?
+        {editorType === "code" &&
+        <>
+          <Editor
+             height="30vh"
+             defaultLanguage="javascript"
+             value={content}
+             theme="vs-dark"
+             onChange={handleCodeEditorChange}
+           />
+           <button className='back-button' onClick={() => runCode()}>Kör</button>
+           <div className='terminal'>
+              <code>{codeResponse}</code>
+           </div><br></br><br></br>
+        </>
+        }
+
+        {owner === true &&
+        <>
+        
         <div className='access-container'>
-          Ge eller ta bort behörighet för användare:<br></br><input
-            type="text"
-            id="message"
-            name="message"
-            onChange={handleInputChange}
-            value={input}
+
+          <div>________________</div><br></br>
+
+          <h3 style={{marginBottom: '7px'}}>Bjud in en person att registrera sig och få tillgång till att redigera det här dokumentet:</h3>
+
+          {invitationStatus ? 
+              <>
+              {invitationStatus === "success" ? <div className='invite_success'>{invitationMessage}</div> : <div className='input_error'>{invitationMessage}</div>}
+              </>
+              :<div style={{height: '13px'}}></div>
+          }
+          
+          <input
+            type="email"
+            data-testid="invite"
+            onChange={handleInputChangeInvite}
+            value={inputInvite}
             autoComplete="off"
             placeholder='Email'
           />
 
-          <button className='back-button' onClick={addUser} >Lägg till</button>
-          <button className='delete-button' onClick={removeUser} >Ta bort</button><br></br><br></br>
+          <button className='back-button' onClick={() => sendInvite()}>Bjud in</button><br></br><br></br>
 
-          <h3>Behöriga:</h3>
-          <div className='usersContainer'>
+          <div>________________</div><br></br>
+
+          <h3>Ge eller ta bort behörighet för användare:</h3>
+
+          {accessStatus ? 
+              <>
+              {accessStatus === "success" ? <div className='invite_success'>{accessMessage}</div> : <div className='input_error'>{accessMessage}</div>}
+              </>
+              :<div style={{height: '13px'}}></div>
+          }
+
+          <input
+            type="text"
+            data-testid="access"
+            onChange={handleInputChangeAccess}
+            value={inputAccess}
+            autoComplete="off"
+            placeholder='Email'
+          />
+
+          <button className='back-button' onClick={ () => addUser()} >Lägg till</button>
+          <button className='delete-button' onClick={ () => removeUser()} >Ta bort</button><br></br><br></br>
+
+          <h4>Behöriga:</h4>
+          <div className='usersAccessContainer'>
               {authUsers}
           </div>
         </div>
-        :
-          <p></p>
+        </>
         }
+        <div className='htmlContent' ref={componentRef}><div dangerouslySetInnerHTML={{ __html: content }} style={{padding: '50px'}}></div></div>
     </div>
     </>
   );
