@@ -5,7 +5,7 @@ const baseURL = "http://localhost:1337";
 
 const docsModel = {
     getAllDocs: async function getAllDocs(token) {
-        const query = "{ docs { _id user name content access } }";
+        const query = "{ docs { _id user name content type access } }";
 
         const result = fetch(`${baseURL}/graphql`, {
             method: 'POST',
@@ -24,7 +24,7 @@ const docsModel = {
 
 
     getUserDocs: async function getUserDocs(token, email) {
-        const query = `{ matchingdocs(user: "${email}") { _id user name content access } }`;
+        const query = `{ matchingdocs(user: "${email}") { _id user name content type access } }`;
 
         const result = fetch(`${baseURL}/graphql`, {
             method: 'POST',
@@ -73,7 +73,7 @@ const docsModel = {
                 "x-access-token": token,
             }
         };
-        const query = `user=${doc.user}&name=${doc.name}`;
+        const query = `user=${doc.user}&name=${doc.name}&type=${doc.type}`;
         
         const response = await fetch(`${baseURL}/docs?${query}`, requestOptions);
         const result = await response.json();
