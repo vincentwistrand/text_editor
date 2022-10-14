@@ -4,8 +4,9 @@
 /*  */
 
 body {
-  background-color: #cbd5e1;
-
+  background-color: #f2f2f2;
+  font-family: arial, sans-serif;
+  font-weight: 100 !important;
   box-sizing: border-box;
   font-weight: bold;
 }
@@ -23,7 +24,7 @@ body {
   text-align: left !important;
   margin: 0;
   position: relative;
-  top: 11px;
+  top: 15px;
   left: 15px;
   color:white;
 }
@@ -142,13 +143,22 @@ body {
 }
 
 
-.docIcon:hover {
+.docIcon:hover,
+.codeIcon:hover {
   transform: translateY(2px);
 }
 
 .docIcon,
+.codeIcon {
+  width: 136px;
+  height: 125px;
+  border-radius: 5px;
+  text-align: center;
+  cursor: pointer;
+}
+
 .userIcon {
-  width: 120px;
+  width: 236px;
   height: 125px;
   border-radius: 5px;
   text-align: center;
@@ -163,15 +173,18 @@ body {
   margin-right: auto;
 }
 
-.docIcon {
-  cursor: pointer;
-}
 
 .docIcon img,
 .userIcon img,
 .logoutIcon img {
   width: 70px;
   margin-top: 15px;
+}
+
+.codeIcon img {
+  width: 48px;
+  height: 65px;
+  margin-top: 18px;
 }
 
 .userIcon {
@@ -182,6 +195,10 @@ body {
 .userIcon p,
 .logoutIcon p {
   margin: 0;
+}
+
+.codeIcon p {
+  margin-top: 3px;
 }
 
 .docs {
@@ -216,7 +233,7 @@ body {
 
 .createDocInput button,
 .logout {
-  background-color: #4CAF50;
+  background-color: #228629;
   color: white;
   padding: 8px 15px;
   margin: 8px 0;
@@ -242,12 +259,14 @@ body {
 
 
 
+
 /* editor */
 
 trix-editor {
   background-color: white!important;
-  min-height: 15em!important;
+  min-height: 25em!important;
   border: 1px solid #000!important;
+  padding: 50px!important;
 }
 
 trix-toolbar {
@@ -255,13 +274,14 @@ trix-toolbar {
 }
 
 .trix-button-group {
-  border-bottom-color: #cbd5e1!important;
+  border: none!important;
   gap: 1px;
 }
 
 .trix-button {
   border: 1px solid #000!important;
   border-radius: 5px!important;
+  background-color: white!important;
 }
 
 .editor-page {
@@ -271,6 +291,10 @@ trix-toolbar {
   padding-inline: 15px;
   position: relative;
   bottom: 200px;
+}
+
+.editor-title-container {
+  text-align: center;
 }
 
 .editor-page h2 {
@@ -313,11 +337,11 @@ trix-toolbar {
 }
 
 .back-button {
-  background-color: #498bf4;
+  background-color: #228629;
 }
 
 .save-button {
-  background-color: #498bf4;
+  background-color: #228629;
 }
 
 .delete-button {
@@ -326,11 +350,55 @@ trix-toolbar {
 
 .access-container input {
   padding: 8px 10px;
-  margin: 8px 10px 0 0 ;
+  margin: 0 10px 0 0 ;
   display: inline-block;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+}
+
+.pdf {
+  width: 200px;
+}
+
+.selected-text {
+  background-color: orange;
+}
+
+.invite_success {
+  font-size: 11px;
+  color: green;
+  font-weight: 100;
+  margin: 0;
+}
+
+.usersAccessContainer {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  flex-wrap: wrap;
+}
+
+.usersAccessContainer div {
+  width: 224px;
+  height: 125px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.terminal {
+  width: 98%;
+  min-height: 100px;
+  padding: 10px;
+  background-color: #1e1e1e;
+  color: white;
+  white-space: pre-line;
+}
+
+.terminal p {
+  margin: 0;
 }
 
 
