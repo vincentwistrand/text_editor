@@ -5,23 +5,33 @@ import TextEditor from "./texteditor";
 import docsModel from "../models/docs";
 import authModel from '../models/auth';
 import docLogo from '../img/docLogo.png';
+import codeLogo from '../img/codeLogo.png';
 import userLogo from '../img/userLogo.png';
 
-function Docs({testDocs=[], user=[], token}) {
+function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
     const [currentUser] = useState(user);
-    const [docs, setDocs] = useState(testDocs);
-    const [userDocs, setUserDocs] = useState(testDocs);
-    const [usersAndDocs, setUsersAndDocs] = useState([]);
     const [currentDoc, setCurrentDoc] = useState(null);
+
+    const [docs, setDocs] = useState(testDocs);
+    const [userDocs, setUserDocs] = useState(testUserDocs);
+    const [usersAndDocs, setUsersAndDocs] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
+
+    // Input from create document and js document inputs.
     const [title, setTitle] = useState("");
+    const [titleCode, setTitleCode] = useState("");
+
+    // Show texteditor component
     const [editorMode, setEditorMode] = useState(null);
+    const [editorType, setEditorType] = useState(null);
+
+    // Show message
     const [createAlert, setCreateAlert] = useState("");
+    const [docMessage, setDocMessage] = useState("");
+    const [codeMessage, setCodeMessage] = useState("");
 
+    // Set owner true to get access to all options in texteditor component.
     const [owner, setOwner] = useState(true);
-
-    //const [selectedUser, setSelectedUser] = useState(null);
-    //const [selectedUserDocsMapped, setSelectedUserDocsMapped] = useState([]);
 
 
     // Get all docs, if admin also get all users.
@@ -42,70 +52,6 @@ function Docs({testDocs=[], user=[], token}) {
     }, []);
 
 
-
-    // Open one of your own documents.
-    const openDoc = (doc) => {
-        setOwner(true);
-        setCurrentDoc(doc);
-        setEditorMode(true);
-    };
-
-
-
-    // SetTitle of new document.
-    const handleInputChange = event => {
-        setTitle(event.target.value);
-    };
-
-
-    // Delete user and docs.
-    //async function deleteUserAndDocs() {
-    //    const docsFiltered = docs.filter(doc => {
-    //        return doc.user === selectedUser.email;
-    //    });
-    //    console.log(docsFiltered);
-
-    //    for (const doc of docsFiltered) {
-    //        const docId = { id: doc._id };
-    //        console.log(docId);
-    //        //await docsModel.deleteDoc(docId, token);
-    //    };
-
-    //    const id = selectedUser._id ;
-    //    //await authModel.deleteUser(id);
-
-    //    setSelectedUser(null);
-
-    //    if (selectedUser === user) {
-    //        window.location.reload(false);
-    //    }
-
-    //};
-
-
-    // Create new document in database.
-    async function newDoc(title) {
-        if (title === "") {
-            return;
-        }
-        setCreateAlert("Skapar...");
-        const doc = { user: currentUser.email, name: title, content: "" };
-        await docsModel.createDoc(doc, token);
-        const allDocuments = await docsModel.getAllDocs(token);
-        const userDocuments = allDocuments.filter(doc => {
-            return doc.user === currentUser.email;
-        });
-        setDocs(allDocuments)
-        setUserDocs(userDocuments);
-
-        setTitle("");
-        setCreateAlert("Nytt dokument skapat!");
-        setTimeout(() => {
-            setCreateAlert("");
-          }, 3000);
-    }
-
-
     // All users with their docs.
     useEffect(() => {
         const uAD = allUsers.map((specificUser, index) => {
@@ -113,7 +59,14 @@ function Docs({testDocs=[], user=[], token}) {
             const allDocs = docs.filter(doc => {
                 return doc.user === specificUser.email;
             });
-            const allUsersDocs = allDocs.map((doc, index) => <p key={doc._id} style={{fontSize: '11px', margin: '0'}}>{doc.name}.doc</p>);
+
+            const allUsersDocs = allDocs.map((doc, index) => {
+                let fileType = ".doc";
+                if (doc.type === "code") {
+                    fileType = ".js"
+                };
+                return <p key={doc._id} style={{fontSize: '11px', margin: '0'}}>{doc.name}{fileType}</p>;
+            });
             
             return  <div key={index} className='userIcon'>
                         <img key={user._id} src={userLogo} alt={"user logo"} />
@@ -126,12 +79,102 @@ function Docs({testDocs=[], user=[], token}) {
     }, [allUsers]);
 
 
+
+    
+    // SetTitle of new document.
+    const handleInputChange = event => {
+        setTitle(event.target.value);
+    };
+
+    // SetTitle of new js document.
+    const handleInputChangeCode = event => {
+        setTitleCode(event.target.value);
+    };
+
+
+
+    // Open one of your own documents.
+    const openDoc = (doc, owner) => {
+        setOwner(owner);
+        setCurrentDoc(doc);
+        setEditorType(doc.type);
+        setEditorMode(true);
+    };
+
+
+    // Create new document in database.
+    async function newDoc() {
+        setDocMessage("");
+        if (title === "") {
+            return;
+        }
+        if (title.includes(" ")) {
+            setDocMessage("Mellanslag inte tillåtna i filnamnet");
+            return;
+        }
+        setCreateAlert("Skapar...");
+        const doc = { user: currentUser.email, name: title, content: "", type: "text" };
+        await docsModel.createDoc(doc, token);
+
+        const allDocuments = await docsModel.getAllDocs(token);
+        const userDocuments = allDocuments.filter(doc => {
+            return doc.user === currentUser.email;
+        });
+
+        setDocs(allDocuments)
+        setUserDocs(userDocuments);
+
+        setTitle("");
+        setCreateAlert("Nytt text-dokument skapat!");
+        setTimeout(() => {
+            setCreateAlert("");
+          }, 3000);
+    }
+
+    // Create new js document in database.
+    async function newDocCode() {
+        setCodeMessage("");
+        if (titleCode === "") {
+            return;
+        }
+        if (titleCode.includes(" ")) {
+            setCodeMessage("Mellanslag inte tillåtna i filnamnet");
+            return;
+        }
+        setCreateAlert("Skapar...");
+        const doc = { user: currentUser.email, name: titleCode, content: "", type: "code" };
+        await docsModel.createDoc(doc, token);
+
+        const allDocuments = await docsModel.getAllDocs(token);
+        const userDocuments = allDocuments.filter(doc => {
+            return doc.user === currentUser.email;
+        });
+        
+        setDocs(allDocuments)
+        setUserDocs(userDocuments);
+
+        setTitleCode("");
+        setCreateAlert("Nytt javascript-dokument skapat!");
+        setTimeout(() => {
+            setCreateAlert("");
+          }, 3000);
+    }
+
+
     // Render doc icon
-    function docIcon(doc, index) {
-        return  <div key={index} className='docIcon' onClick={() => openDoc(doc)}>
-                    <img src={docLogo}  alt={"document logo"}/>
-                    <p>{doc.name}</p>
-                </div>
+    function docIcon(doc, index, owner) {
+        if (doc.type === "text") {
+            return  <div key={index} className='docIcon' onClick={() => openDoc(doc, owner)}>
+                        <img src={docLogo}  alt={"document logo"}/>
+                        <p>{doc.name}.doc</p>
+                    </div>
+        }
+        if (doc.type === "code") {
+            return  <div key={index} className='codeIcon' onClick={() => openDoc(doc, owner)}>
+                        <img src={codeLogo}  alt={"code logo"}/>
+                        <p>{doc.name}.js</p>
+                    </div>
+        }
     }
 
 
@@ -145,6 +188,7 @@ function Docs({testDocs=[], user=[], token}) {
                 setCurrentDoc={setCurrentDoc}
                 token={token}
                 owner={owner}
+                editorType={editorType}
                 setEditorMode={setEditorMode} 
                 setDocs={setDocs}
                 setUserDocs={setUserDocs}
@@ -162,6 +206,7 @@ function Docs({testDocs=[], user=[], token}) {
             
 
             <div className='docs'>
+                <h1>Välkommen!</h1>
                 {!createAlert ? 
                     <div style={{height: '16px'}}></div>
                     :
@@ -169,6 +214,8 @@ function Docs({testDocs=[], user=[], token}) {
                 }
 
                 <h2>Skapa ett nytt dokument</h2>
+
+                {docMessage ? <div className='input_error'>{docMessage}</div>:<div style={{height: '13px'}}></div>}
 
                 <div className='createDocInput'>
                     <input
@@ -178,10 +225,26 @@ function Docs({testDocs=[], user=[], token}) {
                         onChange={handleInputChange}
                         value={title}
                         autoComplete="off"
-                        placeholder='Titel'
+                        placeholder='filnamn'
                     />
 
-                    <button onClick={() => newDoc(title)}>Skapa</button>
+                    <button onClick={() => newDoc()}>Skapa</button>
+                </div>
+
+                <h2>Skapa ett nytt javascript-dokument</h2>
+
+                {codeMessage ? <div className='input_error'>{codeMessage}</div>:<div style={{height: '13px'}}></div>}
+
+                <div className='createDocInput'>
+                    <input
+                        type="text"
+                        onChange={handleInputChangeCode}
+                        value={titleCode}
+                        autoComplete="off"
+                        placeholder='filnamn'
+                    />
+
+                    <button onClick={() => newDocCode()}>Skapa</button>
                 </div>
 
                 <p>_____________</p>
@@ -189,7 +252,10 @@ function Docs({testDocs=[], user=[], token}) {
                 <h2>Dina dokument</h2>
 
                 <div className='docsContainer'>
-                    {userDocs.map((doc, index) => docIcon(doc, index))}
+                    {userDocs.map((doc, index) => {
+                        const owner = true;
+                        return docIcon(doc, index, owner);
+                        })}
                 </div>
 
                 <p>_____________</p>
@@ -198,7 +264,8 @@ function Docs({testDocs=[], user=[], token}) {
                 <div className='docsContainer'>
                     {docs.map((doc, index) => {
                         if (doc.access.includes(user.email)) {
-                            return  docIcon(doc, index);
+                            const owner = false;
+                            return  docIcon(doc, index, owner);
                         } else {
                             return null;
                         }   
