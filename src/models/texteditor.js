@@ -169,6 +169,66 @@ const editorModel = {
           setInvitationStatus("error");
           setInvitationMessage(result.errors.message);
         }
+    },
+
+    // Delete document from database.
+    deleteDocument: async function deleteDocument(  
+      socket,
+      token,
+      setEditorMode,
+      currentUser,
+      setDocs,
+      setUserDocs,
+      setSaved,
+      id
+    ) {
+      setSaved("Raderar...");
+      setTimeout(() => {
+        setSaved("");
+      }, 3000);
+  
+      const doc = { id: id };
+      await docsModel.deleteDoc(doc, token);
+  
+      if (socket) {
+        socket.disconnect();
+        console.log("Disconnected");
+      }
+      
+      setEditorMode("");
+  
+      const allDocs = await docsModel.getAllDocs(token);
+      const userDocuments = allDocs.filter(doc => {
+        return doc.user === currentUser.email;
+      });
+  
+      setDocs(allDocs);
+      setUserDocs(userDocuments);
+    },
+
+    // Disconnect from socket and go back to choose document page.
+    goBack: async function goBack(  
+      socket,
+      token,
+      setEditorMode,
+      currentUser,
+      setDocs,
+      setUserDocs
+    ) {
+      if (socket) {
+        socket.disconnect();
+        console.log("Disconnected");
+      }
+  
+      setEditorMode("");
+  
+      const allDocs = await docsModel.getAllDocs(token);
+      const userDocuments = allDocs.filter(doc => {
+        return doc.user === currentUser.email;
+      });
+  
+      setDocs(allDocs);
+      setUserDocs(userDocuments)
     }
 }
 
