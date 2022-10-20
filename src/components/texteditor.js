@@ -170,9 +170,14 @@ function TextEditor({
       // Recieve document content and set editor value.
       socket.on("doc", (data) => {
         setFromSocket(true);
-        let element = document.querySelector("trix-editor");
+        if (editorType === "text") {
+          let element = document.querySelector("trix-editor");
+          element.value = data.html;
+        }
+        if (editorType === "code") {
+          setContent(data.html);
+        }
 
-        element.value = data.html;
       });
 
       // If document successfully saved, show confirmation
@@ -185,10 +190,10 @@ function TextEditor({
       });
 
     };
+        // eslint-disable-next-line
   }, [socket]);
 
-
-
+  
   // Save changes in document to database.
   async function save() {
     setSaved("Sparar...");
@@ -202,88 +207,31 @@ function TextEditor({
     }, 3000);
   }
 
-
-
-
   // Disconnect from socket and go back to choose document page.
   async function goBack() {
-    if (socket) {
-      socket.disconnect();
-      console.log("Disconnected");
-    }
-
-    setEditorMode("");
-
-    const allDocs = await docsModel.getAllDocs(token);
-    const userDocuments = allDocs.filter(doc => {
-      return doc.user === currentUser.email;
-    });
-
-    setDocs(allDocs);
-    setUserDocs(userDocuments)
+    await editorModel.goBack(  
+      socket,
+      token,
+      setEditorMode,
+      currentUser,
+      setDocs,
+      setUserDocs
+    );
   }
-
-
-
 
   // Delete document from database.
   async function deleteDocument() {
-    setSaved("Raderar...");
-    setTimeout(() => {
-      setSaved("");
-    }, 3000);
-
-    const doc = { id: id };
-    await docsModel.deleteDoc(doc, token);
-
-    if (socket) {
-      socket.disconnect();
-      console.log("Disconnected");
-    }
-    
-    setEditorMode("");
-
-    const allDocs = await docsModel.getAllDocs(token);
-    const userDocuments = allDocs.filter(doc => {
-      return doc.user === currentUser.email;
-    });
-
-    setDocs(allDocs);
-    setUserDocs(userDocuments);
+    await editorModel.deleteDocument(  
+      socket,
+      token,
+      setEditorMode,
+      currentUser,
+      setDocs,
+      setUserDocs,
+      setSaved,
+      id
+    );
   }
-
-
-
-
-  // Set editor content
-  function handleChange(event, newValue) {
-    if (newValue !== content) {
-      setContent(newValue);
-    }
-  }
-
-  // Set content of code editor.
-  function handleCodeEditorChange(value, event) {
-    setContent(value);
-  }
-
-  // Handle input from access field
-  const handleInputChangeAccess = event => {
-    setInputAccess(event.target.value);
-  };
-
-  // Handle input from invite field
-  const handleInputChangeInvite = event => {
-    setInputInvite(event.target.value);
-  };
-
-  const runCode = async () => {
-    const response = await codeModel.postCode(content);
-    console.log(response)
-    setCodeResponse(response);
-  }
-
-
 
   // Send invite
   async function sendInvite() {
@@ -335,11 +283,37 @@ function TextEditor({
     }
   }
 
+  // Set editor content
+  function handleChange(event, newValue) {
+    if (newValue !== content) {
+      setContent(newValue);
+    }
+  }
 
+  // Set content of code editor.
+  function handleCodeEditorChange(value, event) {
+    setContent(value);
+  }
+
+  // Handle input from access field
+  const handleInputChangeAccess = event => {
+    setInputAccess(event.target.value);
+  };
+
+  // Handle input from invite field
+  const handleInputChangeInvite = event => {
+    setInputInvite(event.target.value);
+  };
+
+  // Run code
+  const runCode = async () => {
+    const response = await codeModel.postCode(content);
+    setCodeResponse(response);
+  }
   
   return (
     <>
-    <div style={{ width: '200px', marginLeft: '20px', textAlign: 'center' }}>
+    <div className='logout-container'>
       <button className='logout' onClick={() => window.location.reload(false)}>Logga ut</button>
       <div style={{textAlign: 'center'}} className='logoutIcon'>
           <img src={userLogo}  alt={"user logo"}/>
@@ -424,7 +398,7 @@ function TextEditor({
 
           <div>________________</div><br></br>
 
-          <h3>Ge eller ta bort behörighet för användare:</h3>
+          <h3 style={{marginBottom: '7px'}}>Ge eller ta bort behörighet för användare:</h3>
 
           {accessStatus ? 
               <>
@@ -445,13 +419,13 @@ function TextEditor({
           <button className='back-button' onClick={ () => addUser()} >Lägg till</button>
           <button className='delete-button' onClick={ () => removeUser()} >Ta bort</button><br></br><br></br>
 
-          <h4>Behöriga:</h4>
+          <h3>Behöriga:</h3>
           <div className='usersAccessContainer'>
               {authUsers}
           </div>
         </div>
-        </>
-        }
+
+        </>}
         <div className='htmlContent' ref={componentRef}><div dangerouslySetInnerHTML={{ __html: content }} style={{padding: '50px'}}></div></div>
     </div>
     </>
