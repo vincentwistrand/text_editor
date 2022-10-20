@@ -51,7 +51,6 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
         // eslint-disable-next-line
     }, []);
 
-
     // All users with their docs.
     useEffect(() => {
         const uAD = allUsers.map((specificUser, index) => {
@@ -78,9 +77,6 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
         // eslint-disable-next-line
     }, [allUsers]);
 
-
-
-    
     // SetTitle of new document.
     const handleInputChange = event => {
         setTitle(event.target.value);
@@ -91,8 +87,6 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
         setTitleCode(event.target.value);
     };
 
-
-
     // Open one of your own documents.
     const openDoc = (doc, owner) => {
         setOwner(owner);
@@ -100,7 +94,6 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
         setEditorType(doc.type);
         setEditorMode(true);
     };
-
 
     // Create new document in database.
     async function newDoc() {
@@ -160,7 +153,6 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
           }, 3000);
     }
 
-
     // Render doc icon
     function docIcon(doc, index, owner) {
         if (doc.type === "text") {
@@ -176,7 +168,6 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
                     </div>
         }
     }
-
 
   return (
     <>
@@ -195,7 +186,7 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
             />
         :
             <>
-            <div style={{ width: '150px', marginLeft: '20px', textAlign: 'center' }}>
+            <div className='logout-container'>
                 <button className='logout' onClick={() => window.location.reload(false)}>Logga ut</button>
                 <div style={{textAlign: 'center'}} className='logoutIcon'>
                     <img src={userLogo}  alt={"user logo"}/>
@@ -204,7 +195,6 @@ function Docs({testDocs=[], testUserDocs=[], user=[], token}) {
                 {user.admin === true ? <p>admin</p>:<p style={{marginLeft: '20px'}}>not admin</p>}
             </div>
             
-
             <div className='docs'>
                 <h1>Välkommen!</h1>
                 {!createAlert ? 
